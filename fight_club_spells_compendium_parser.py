@@ -1,7 +1,6 @@
 from bs4 import BeautifulSoup
 import codecs
 import string
-import sets
 
 f = codecs.open('Spells Compendium 1.1.2.xml', encoding='utf-8')
 soup = BeautifulSoup(f.read(), "xml")
@@ -23,7 +22,7 @@ class Spell:
         self.classes = classes
 
 spells = []
-classes = sets.Set()
+classes = Set()
 for spell in soup.compendium.find_all('spell'):
     name = spell.find("name").string
 
