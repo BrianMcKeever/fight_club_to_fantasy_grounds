@@ -22,13 +22,14 @@ class Spell:
         self.classes = classes
 
 spells = []
-classes = Set()
+classes = set()
 for spell in soup.compendium.find_all('spell'):
     name = spell.find("name").string
 
     texts = list(spell.find_all("text"))
     texts = map(lambda text: text.string, texts)
     texts = filter(lambda text: text is not None, texts)
+    texts = map(lambda text: text.encode('ascii', errors='ignore').strip(), texts)
 
     description = string.join(texts, "\n")
     source = texts[-1]
