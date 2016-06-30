@@ -159,11 +159,13 @@ for monster in soup.compendium.find_all('monster'):
         trait_name = trait.get_name()
         if trait_name == "Spellcasting" or trait_name == "Innate Spellcasting":
             texts = trait.get_texts()
-            f.write("%s. %s\n"%(trait.get_name(), texts[0]))
+            f.write("%s. %s"%(trait.get_name(), texts[0]))
             for text in texts[1:]:
                 text = text.encode('ascii', errors='ignore')
-                f.write("%s\n"%text)
+                text = text.strip()
+                f.write("\\r%s"%text)
             #f.write("%s\n"%spells)
+            f.write("\n")
             continue
         f.write("%s. %s\n"%(trait.get_name(), trait.get_texts()[0]))
 
