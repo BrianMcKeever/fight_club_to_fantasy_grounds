@@ -94,6 +94,17 @@ def process_hp(monster):
         hp += " (1d1)"
     return hp
 
+def output_texts_on_one_line(file, texts):
+    past_first = False
+
+    for text in texts:
+        if past_first:
+            file.write("\\r")
+        else:
+            past_first = True
+        file.write(text)
+    else:
+        file.write("\n")
 
 for monster in soup.compendium.find_all('monster'):
     name = monster.find("name").string
@@ -167,24 +178,28 @@ for monster in soup.compendium.find_all('monster'):
             #f.write("%s\n"%spells)
             f.write("\n")
             continue
-        f.write("%s. %s\n"%(trait.get_name(), trait.get_texts()[0]))
+        f.write("%s. "%trait.get_name())
+        output_texts_on_one_line(f, trait.get_texts())
 
     f.write("ACTIONS\n")
     for action in actions:
+        f.write("%s. "%action.get_name())
         texts = action.get_texts()
-        f.write("%s. %s\n"%(action.get_name(), texts[0]))
+        output_texts_on_one_line(f, texts)
 
     if len(reactions) > 0:
         f.write("REACTIONS\n")
         for reaction in reactions:
+            f.write("%s. "%reaction.get_name())
             texts = reaction.get_texts()
-            f.write("%s. %s\n"%(reaction.get_name(), texts[0]))
+            output_texts_on_one_line(f, texts)
 
     if len(legendary_actions) > 0:
         f.write("LEGENDARY ACTIONS\n")
         for legendary in legendary_actions:
+            f.write("%s. "%legendary.get_name())
             texts = legendary.get_texts()
-            f.write("%s. %s\n"%(legendary.get_name(), texts[0]))
+            output_texts_on_one_line(f, texts)
 
     f.write("##;\n")
     f.write("Source: %s\n"%source)
