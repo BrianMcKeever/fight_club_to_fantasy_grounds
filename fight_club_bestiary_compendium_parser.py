@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 import codecs
 from shared import process_abilities
-f = codecs.open('Bestiary Compendium 1.2.0.xml', encoding='utf-8')
+f = codecs.open('Bestiary Compendium 1.2.1.xml', encoding='utf-8')
 soup = BeautifulSoup(f.read(), "xml")
 f.close()
 

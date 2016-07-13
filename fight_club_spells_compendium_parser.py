@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 import codecs
 import string
 
-f = codecs.open('Spells Compendium 1.1.2.xml', encoding='utf-8')
+f = codecs.open('Spells Compendium 1.1.3.xml', encoding='utf-8')
 soup = BeautifulSoup(f.read(), "xml")
 f.close()
 

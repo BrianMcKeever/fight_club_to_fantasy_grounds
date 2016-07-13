@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 import codecs
 from shared import process_abilities
 
-f = codecs.open('Character Compendium 1.3.1.xml', encoding='utf-8')
+f = codecs.open('Character Compendium 1.3.3.xml', encoding='utf-8')
 soup = BeautifulSoup(f.read(), "xml")
 f.close()
 
