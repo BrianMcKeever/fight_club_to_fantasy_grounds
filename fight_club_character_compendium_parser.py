@@ -63,9 +63,9 @@ for background in soup.compendium.find_all('background'):
     f.write("Suggested Characteristics\n")
     f.write("d0 Personality Trait\n")
     f.write("\n")
+f.close()
 
 f = codecs.open('class' '.txt', 'w', encoding='utf-8')
-
 for player_class in soup.compendium.find_all('class'):
     name = player_class.find("name").string
     hd = int(player_class.hd.string)
@@ -96,4 +96,54 @@ for player_class in soup.compendium.find_all('class'):
     for line in starting_equipment:
         f.write("%s\n"%line)
     f.write("\n")
+f.close()
 
+
+def convert_ability_to_fg_format(ability):
+    name, value = ability.split(" ")
+    if name == "Cha":
+        stat_name = "Charisma"
+    elif name == "Con":
+        stat_name = "Constitution"
+    elif name == "Dex":
+        stat_name = "Dexterity"
+    elif name == "Int":
+        stat_name = "Intelligence"
+    elif name == "Str":
+        stat_name = "Strength"
+    elif name == "Wis":
+        stat_name = "Wisdom"
+    else:
+        raise Exception("unknown stat")
+    return "#!;Ability Score Increase. Your %s score increases by %s.\n"%(stat_name, value)
+
+
+def process_stats(race_node):
+    if race_node.ability is None:
+        return []
+    stats = race_node.ability.string
+    stats = stats.split(",")
+    stats = map(lambda s: s.strip(), stats)
+    stats = map(convert_ability_to_fg_format, stats)
+    return stats
+
+
+f = codecs.open('races' '.txt', 'w', encoding='utf-8')
+for race in soup.compendium.find_all('race'):
+    race_name = race.find("name").string
+    race_name = race_name.replace("(", "")
+    race_name = race_name.replace(")", "")
+    size = race.size.string
+    speed = race.speed.string
+    stats = process_stats(race)
+    traits = process_abilities(race, "trait")
+
+    f.write("##; %s\n"%race_name)
+    f.write("%s Traits\n"%race_name)
+    for line in stats:
+        f.write(line)
+    for trait in traits:
+        f.write("#!; %s. "%(trait.get_name()))
+        for text in trait.get_texts():
+            f.write("%s\n"%text)
+f.close()
