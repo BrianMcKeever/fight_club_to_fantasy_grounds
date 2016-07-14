@@ -9,6 +9,9 @@ class Ability:
     def get_texts(self):
         return self._texts
 
+    def __str__(self):
+        return self.get_name()
+
 def process_abilities(monster, ability_type):
     name = monster.find("name").string
 
