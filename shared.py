@@ -19,10 +19,13 @@ def process_abilities(monster, ability_type):
     abilitiesInput = monster.find_all(ability_type)
     abilities = []
     for ability in list(abilitiesInput):
-        name = ability.find("name").string
-        texts = list(ability.find_all("text"))
-        texts = map(lambda text: text.string, texts)
-        texts = filter(lambda text: text is not None, texts)
-        abilities.append(Ability(name, texts))
+        abilities.append(process_ability(ability))
     return abilities
 
+def process_ability(ability):
+    name = ability.find("name").string
+    texts = list(ability.find_all("text"))
+    texts = map(lambda text: text.string, texts)
+    texts = filter(lambda text: text is not None, texts)
+    texts = map(lambda text: text.encode('ascii', errors='ignore').strip(), texts)
+    return Ability(name, texts)

@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 import codecs
-from shared import process_abilities, Ability
+from shared import process_abilities, Ability, process_ability
 
 f = codecs.open('Character Compendium 1.3.3.xml', encoding='utf-8')
 soup = BeautifulSoup(f.read(), "xml")
@@ -38,8 +38,6 @@ def abilityHeads(predicate, iterable):
 
 for background in soup.compendium.find_all('background'):
     name = background.find("name").string
-    if name == "Haunted One":
-        print("roar")
     proficiency = background.proficiency
     abilities = process_abilities(background, "trait")
     skills = abilityHead(lambda x: x.get_name() == "Skill Proficiencies", abilities)
@@ -154,4 +152,15 @@ for race in soup.compendium.find_all('race'):
         f.write("#!; %s. "%(trait.get_name()))
         for text in trait.get_texts():
             f.write("%s\n"%text)
+f.close()
+
+
+f = codecs.open('feats' '.txt', 'w', encoding='utf-8')
+for feat in soup.compendium.find_all('feat'):
+    ability = process_ability(feat)
+
+    f.write("##; %s\n"%ability.get_name())
+    for line in ability.get_texts():
+        f.write("%s\n"%line)
+    f.write("\n")
 f.close()
