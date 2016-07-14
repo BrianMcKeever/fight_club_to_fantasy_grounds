@@ -41,13 +41,8 @@ for background in soup.compendium.find_all('background'):
     proficiency = background.proficiency
     abilities = process_abilities(background, "trait")
     skills = abilityHead(lambda x: x.get_name() == "Skill Proficiencies", abilities)
-    if skills is None and name == "Haunted One":
-        skills = abilityHead(lambda x: x.get_name() == "Skill Proficincies", abilities)
     tools = abilityHead(lambda x: x.get_name() == "Tool Proficiencies", abilities)
     feature = head(lambda x: x.get_name()[:8] == "Feature:", abilities)
-    if feature is None and name == "Haunted One":
-        feature = head(lambda x: x.get_name() == "Heart of Darkness", abilities)
-        feature = Ability("Feature: " + feature.get_name(), feature.get_texts())
 
     languages = abilityHead(lambda x: x.get_name() == "Languages", abilities)
     equipment = abilityHead(lambda x: x.get_name() == "Equipment", abilities)
