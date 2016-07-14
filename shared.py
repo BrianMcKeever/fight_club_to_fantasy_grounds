@@ -1,6 +1,8 @@
 class Ability:
     def __init__(self, name, texts=None):
         self._name = name
+        self._name = self._name.replace("(", "- ")
+        self._name = self._name.replace(")", "")
         self._texts = texts if texts is not None else []
 
     def get_name(self):
@@ -29,3 +31,4 @@ def process_ability(ability):
     texts = filter(lambda text: text is not None, texts)
     texts = map(lambda text: text.encode('ascii', errors='ignore').strip(), texts)
     return Ability(name, texts)
+
