@@ -159,3 +159,64 @@ for feat in soup.compendium.find_all('feat'):
         f.write("%s\n"%line)
     f.write("\n")
 f.close()
+
+
+f = codecs.open('class' '.txt', 'w', encoding='utf-8')
+for player_class in soup.compendium.find_all('class'):
+    class_name = player_class.find("name").string
+    hit_die_base = player_class.hd.string
+    saves = player_class.proficiency.string
+    spell_ability = None
+    if player_class.spellAbility:
+        spell_ability = player_class.spellAbility.string
+
+    armor = None
+    weapons = None
+    skills = None
+    tools = "None"
+
+    starting_equipment = None
+
+    features = []
+
+    autolevels = player_class.find_all("autolevel")
+    for autolevel in autolevels:
+        for feature in autolevel.find_all("feature"):
+            feature_name = feature.find("name").string
+            if feature_name == "Starting Proficiencies":
+                for text in feature.find_all("text"):
+                    text = text.string
+                    if text[:5] == "Armor":
+                        armor = text
+                    elif text[:7] == "Weapons":
+                        weapons = text
+                    elif text[:5] == "Tools":
+                        tools = text
+                    elif text[:6] == "Skills":
+                        skills = text
+            elif feature_name == "Starting Equipment":
+                starting_equipment = process_ability(feature)
+            else:
+                features.append((autolevel["level"], process_ability(feature)))
+
+    f.write("##; %s\n"%class_name)
+    f.write("Hit Points\n")
+    f.write("Hit Dice: 1d%s per %s level.\n"%(hit_die_base, class_name))
+    f.write("Hit Points at 1st Level: %s + your Constitution modifier.\n"%hit_die_base)
+    f.write("Hit Points at Higher Levels: 1d%s (or %s) + your Constitution modifier per %s level after 1st.\n"%(hit_die_base, int(hit_die_base)/2 + 1, class_name))
+    f.write("Proficiencies\n")
+    f.write("%s\n"%armor)
+    f.write("%s\n"%weapons)
+    f.write("%s\n"%tools)
+    f.write("Saving Throws: %s\n"%saves)
+    f.write("%s\n"%skills)
+    f.write("Equipment\n")
+    for text in starting_equipment.get_texts():
+        f.write("%s\n"%text)
+    for feature in features:
+        f.write("#fe; %s;%s\n"%(feature[1].get_name(), feature[0]))
+        for text in feature[1].get_texts():
+            f.write("%s\n"%text)
+
+    f.write("\n")
+f.close()
