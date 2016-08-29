@@ -60,6 +60,7 @@ for background in soup.compendium.find_all('background'):
         f.write("%s\n"%feature.get_name())
         f.write("%s\n"%feature.get_texts()[0])
     else:
+        print("%s is missing a feature"%name)
         f.write("Feature: -\n")
     f.write("Suggested Characteristics\n")
     f.write("d0 Personality Trait\n")

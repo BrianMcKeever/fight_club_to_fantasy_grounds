@@ -155,7 +155,7 @@ for item in soup.compendium.find_all('item'):
     stealth = "NO"
     if item.stealth:
         stealth = item.stealth.string
-    cost = "1"
+    cost = "1" #Costs aren't in the item compendium.
     item_type = process_type(item)
     types.append(item_type)
     items.append(Item(ability.get_name(), item_type, ability.get_texts(), damage2, weight, ac, weapon_range, damage_type, damage1, properties, cost, strength, stealth))

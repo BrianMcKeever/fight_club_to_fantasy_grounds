@@ -5,9 +5,6 @@ f = codecs.open('Bestiary Compendium 1.2.1.xml', encoding='utf-8')
 soup = BeautifulSoup(f.read(), "xml")
 f.close()
 
-f = codecs.open('npcs.txt', 'w', encoding='utf-8')
-
-
 sizes = {
     "G": "Gargantuan",
     "H": "Huge",
@@ -106,6 +103,80 @@ def output_texts_on_one_line(file, texts):
     else:
         file.write("\n")
 
+
+def write_monster(f, monster):
+    f.write(monster["name"] + "\n")
+    f.write("%s %s, %s\n"%(monster["size"], monster["type"], monster["alignment"]))
+    f.write("Armor Class %s\n"%monster["ac"])
+    f.write("Hit Points %s\n"%monster["hp"])
+    f.write("Speed %s\n"%monster["speed"])
+    f.write("STR DEX CON INT WIS CHA\n")
+    f.write("%s %s %s %s %s %s\n"%(monster["strength"], monster["dexterity"],
+        monster["constitution"],
+        monster["intelligence"], monster["wisdom"], monster["charisma"]))
+    if monster["saves"] is not None:
+        f.write("Saving Throws %s\n"%monster["saves"])
+    if monster["skill"] is not None:
+        f.write("Skills %s\n"%monster["skill"])
+    if monster["vulnerabilities"] is not None:
+        f.write("Damage Vulnerabilities %s\n"%monster["vulnerabilities"])
+    if monster["resists"] is not None:
+        f.write("Damage Resistances %s\n"%monster["resists"])
+    if monster["immunities"] is not None:
+        f.write("Damage Immunities %s\n"%monster["immunities"])
+    if monster["condition_immunities"] is not None:
+        f.write("Condition Immunities %s\n"%monster["condition_immunities"])
+    if monster["senses"] is None:
+        f.write("Senses passive Perception %s\n"%monster["passive"])
+    else:
+        f.write("Senses %s, passive Perception %s\n"%(monster["senses"],
+        monster["passive"]))
+    f.write("Languages %s\n"%monster["languages"])
+
+    if monster["cr"] == "00":
+        monster["cr"] = "0"
+    f.write("Challenge %s\n"%monster["cr"])
+
+    for trait in monster["traits"]:
+        trait_name = trait.get_name()
+        if trait_name == "Spellcasting" or trait_name == "Innate Spellcasting":
+            texts = trait.get_texts()
+            f.write("%s. %s"%(trait.get_name(), texts[0]))
+            for text in texts[1:]:
+                text = text.encode('ascii', errors='ignore')
+                text = text.strip()
+                f.write("\\r%s"%text)
+            f.write("\n")
+            continue
+        f.write("%s. "%trait.get_name())
+        output_texts_on_one_line(f, trait.get_texts())
+
+    f.write("ACTIONS\n")
+    for action in monster["actions"]:
+        f.write("%s. "%action.get_name())
+        texts = action.get_texts()
+        output_texts_on_one_line(f, texts)
+
+    if len(monster["reactions"]) > 0:
+        f.write("REACTIONS\n")
+        for reaction in monster["reactions"]:
+            f.write("%s. "%reaction.get_name())
+            texts = reaction.get_texts()
+            output_texts_on_one_line(f, texts)
+
+    if len(monster["legendary_actions"]) > 0:
+        f.write("LEGENDARY ACTIONS\n")
+        for legendary in monster["legendary_actions"]:
+            f.write("%s. "%legendary.get_name())
+            texts = legendary.get_texts()
+            output_texts_on_one_line(f, texts)
+
+    f.write("##;\n")
+    f.write("Source: %s\n"%monster["source"])
+    f.write("\n")
+
+monsters = []
+
 for monster in soup.compendium.find_all('monster'):
     name = monster.find("name").string
     size = process_size(monster.size.string)
@@ -115,16 +186,16 @@ for monster in soup.compendium.find_all('monster'):
     hp = process_hp(monster)
     speed = process_speed(monster)
     strength = process_attribute(monster.str.string)
-    dex = process_attribute(monster.dex.string)
-    con = process_attribute(monster.con.string)
+    dexterity = process_attribute(monster.dex.string)
+    constitution = process_attribute(monster.con.string)
     intelligence = process_attribute(monster.int.string)
-    wis = process_attribute(monster.wis.string)
-    cha = process_attribute(monster.cha.string)
+    wisdom = process_attribute(monster.wis.string)
+    charisma = process_attribute(monster.cha.string)
     skill = monster.skill.string if monster.skill else None
     saves = monster.save.string if monster.save else None
     resists = monster.resist.string if monster.resist else None
     immunities = monster.immune.string if monster.immune else None
-    conditionImmunities = monster.conditionImmune.string if monster.conditionImmune else None
+    condition_immunities = monster.conditionImmune.string if monster.conditionImmune else None
     vulnerabilities = monster.vulnerable.string if monster.vulnerable else None
     senses = monster.senses.string if monster.senses else None
     passive = monster.passive.string
@@ -137,70 +208,47 @@ for monster in soup.compendium.find_all('monster'):
     legendary_actions = process_abilities(monster, "legendary")
     spells = monster.spells.string if monster.spells else None
 
-    f.write(name + "\n")
-    f.write("%s %s, %s\n"%(size, type, alignment))
-    f.write("Armor Class %s\n"%ac)
-    f.write("Hit Points %s\n"%hp)
-    f.write("Speed %s\n"%speed)
-    f.write("STR DEX CON INT WIS CHA\n")
-    f.write("%s %s %s %s %s %s\n"%(strength, dex, con, intelligence, wis, cha))
-    if saves is not None:
-        f.write("Saving Throws %s\n"%saves)
-    if skill is not None:
-        f.write("Skills %s\n"%skill)
-    if vulnerabilities is not None:
-        f.write("Damage Vulnerabilities %s\n"%vulnerabilities)
-    if resists is not None:
-        f.write("Damage Resistances %s\n"%resists)
-    if immunities is not None:
-        f.write("Damage Immunities %s\n"%immunities)
-    if conditionImmunities is not None:
-        f.write("Condition Immunities %s\n"%conditionImmunities)
-    if senses is None:
-        f.write("Senses passive Perception %s\n"%passive)
-    else:
-        f.write("Senses %s, passive Perception %s\n"%(senses, passive))
-    f.write("Languages %s\n"%languages)
+    monster = {}
+    monster["name"] = name
+    monster["size"] = size
+    monster["type"] = type
+    monster["source"] = source
+    monster["alignment"] = alignment
+    monster["ac"] = ac
+    monster["hp"] = hp
+    monster["speed"] = speed
+    monster["strength"] = strength
+    monster["dexterity"] = dexterity
+    monster["constitution"] = constitution
+    monster["intelligence"] = intelligence
+    monster["wisdom"] = wisdom
+    monster["charisma"] = charisma
+    monster["skill"] = skill
+    monster["saves"] = saves
+    monster["resists"] = resists
+    monster["immunities"] = immunities
+    monster["condition_immunities"] = condition_immunities
+    monster["vulnerabilities"] = vulnerabilities
+    monster["senses"] = senses
+    monster["passive"] = passive
+    monster["languages"] = languages
+    monster["cr"] = cr
+    monster["traits"] = traits
+    monster["actions"] = actions
+    monster["reactions"] = reactions
+    monster["legendary_actions"] = legendary_actions
+    monster["spells"] = spells
+    monsters.append(monster)
 
-    if cr == "00":
-        cr = "0"
-    f.write("Challenge %s\n"%cr)
+f = codecs.open('npcs.txt', 'w', encoding='utf-8')
+for monster in monsters:
+    write_monster(f, monster)
+f.close()
 
-    for trait in traits:
-        trait_name = trait.get_name()
-        if trait_name == "Spellcasting" or trait_name == "Innate Spellcasting":
-            texts = trait.get_texts()
-            f.write("%s. %s"%(trait.get_name(), texts[0]))
-            for text in texts[1:]:
-                text = text.encode('ascii', errors='ignore')
-                text = text.strip()
-                f.write("\\r%s"%text)
-            #f.write("%s\n"%spells)
-            f.write("\n")
-            continue
-        f.write("%s. "%trait.get_name())
-        output_texts_on_one_line(f, trait.get_texts())
+f = codecs.open('shapeshift_npcs.txt', 'w', encoding='utf-8')
+beasts = filter(lambda x: x["type"] == "beast", monsters[:])
+for beast in beasts:
+    print(beast["name"])
+    write_monster(f, beast)
+f.close()
 
-    f.write("ACTIONS\n")
-    for action in actions:
-        f.write("%s. "%action.get_name())
-        texts = action.get_texts()
-        output_texts_on_one_line(f, texts)
-
-    if len(reactions) > 0:
-        f.write("REACTIONS\n")
-        for reaction in reactions:
-            f.write("%s. "%reaction.get_name())
-            texts = reaction.get_texts()
-            output_texts_on_one_line(f, texts)
-
-    if len(legendary_actions) > 0:
-        f.write("LEGENDARY ACTIONS\n")
-        for legendary in legendary_actions:
-            f.write("%s. "%legendary.get_name())
-            texts = legendary.get_texts()
-            output_texts_on_one_line(f, texts)
-
-    f.write("##;\n")
-    f.write("Source: %s\n"%source)
-    f.write("\n")

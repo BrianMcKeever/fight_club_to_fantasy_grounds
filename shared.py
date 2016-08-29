@@ -1,6 +1,9 @@
 class Ability:
     def __init__(self, name, texts=None):
+        if name is None:
+            name = ""
         self._name = name
+
         self._name = self._name.replace("(", "- ")
         self._name = self._name.replace(")", "")
         self._texts = texts if texts is not None else []

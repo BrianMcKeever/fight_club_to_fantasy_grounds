@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 import codecs
 import string
+import re
 
 f = codecs.open('Spells Compendium 1.1.3.xml', encoding='utf-8')
 soup = BeautifulSoup(f.read(), "xml")
@@ -32,7 +33,14 @@ for spell in soup.compendium.find_all('spell'):
     texts = map(lambda text: text.encode('ascii', errors='ignore').strip(), texts)
 
     description = string.join(texts, "\n")
-    source = texts[-1]
+    if re.search("(EE)", name):
+        source = "Elemental Evil Player's Companion"
+    elif re.search("(SCAG)", name):
+        source = "Sword Coast Adventurer's Guide"
+    elif re.search("\(", name):
+        print "maybe we're missing a source: %s" % name
+    else:
+        source = "Player's Handbook"
 
     level = int(spell.level.string)
     school = spell.school.string
@@ -76,6 +84,9 @@ def write_spell_index_for_level(class_spells, level):
 f.write("#@;\n")
 class_list = list(classes)
 class_list.sort()
+f.write("Index Spells\n")
+map(lambda x: write_spell_index_for_level(spells, x), range(0, 10))
+
 for spell_class in class_list:
     class_spells = filter(lambda x: spell_class in x.classes, spells)
     f.write("%s Spells\n"%spell_class)
@@ -95,7 +106,10 @@ spellSchool = {
 f.write("##;\n")
 for spell in spells:
     f.write("%s\n"%spell.name)
-    f.write("%s-level %s\n"%(orderDescriptor[spell.level], spellSchool[spell.school]))
+    if spell.level == "0":
+        f.write("%s cantrip\n"%(spellSchool[spell.school].capitalize()))
+    else:
+        f.write("%s-level %s\n"%(orderDescriptor[spell.level], spellSchool[spell.school]))
     f.write("Casting Time: %s\n"%spell.casting_time)
     f.write("Range: %s\n"%spell.range)
     f.write("Components: %s\n"%spell.components)
